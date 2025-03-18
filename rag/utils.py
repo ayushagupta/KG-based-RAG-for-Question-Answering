@@ -15,6 +15,14 @@ def extract_disease_entities(text: str, client: OpenAIClient):
     return response["diseases"]
 
 
+def get_embedding_function(model_name):
+    return HuggingFaceEmbeddings(model_name=model_name)
+
+
 def get_vector_store(vector_db_path, sentence_embedding_model):
-    embedding_function = HuggingFaceEmbeddings(model_name=sentence_embedding_model)
+    embedding_function = get_embedding_function(model_name=sentence_embedding_model)
     return Chroma(embedding_function=embedding_function, persist_directory=vector_db_path)
+
+
+def get_text_embedding(text, embedding_function):
+    return embedding_function.embed_query(text)

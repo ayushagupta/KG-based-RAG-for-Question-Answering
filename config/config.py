@@ -22,4 +22,11 @@ class Config:
         "VECTOR_DB_SENTENCE_EMBEDDING_MODEL", "sentence-transformers/all-MiniLM-L6-v2"
     )
 
+    EMBEDDING_MODEL_FOR_NODE_RETRIEVAL = os.getenv(
+        "EMBEDDING_MODEL_FOR_NODE_RETRIEVAL", "sentence-transformers/all-MiniLM-L6-v2"
+    )
+    EMBEDDING_MODEL_FOR_CONTEXT_RETRIEVAL = os.getenv(
+        "EMBEDDING_MODEL_FOR_CONTEXT_RETRIEVAL", "pritamdeka/S-PubMedBert-MS-MARCO"
+    )
+
 config = Config()
