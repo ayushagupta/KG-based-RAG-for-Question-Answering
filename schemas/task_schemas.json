@@ -1,0 +1,22 @@
+{
+    "disease_entity_extraction": {
+        "format": {
+            "type": "json_schema",
+            "name": "disease_entities",
+            "strict": false,
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "diseases": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "required": ["diseases"],
+                "additionalProperties": false
+            }
+        }
+    }
+}
