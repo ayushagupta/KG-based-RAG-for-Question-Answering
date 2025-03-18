@@ -1,5 +1,5 @@
 import pickle
-from langchain_community.vectorstores import Chroma
+from langchain_chroma import Chroma
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from config.config import config
@@ -35,7 +35,4 @@ def create_vector_db():
 
     print("VectorDB created successfully!")
 
-
-if __name__ == "__main__":
-    create_vector_db()
 
