@@ -1,0 +1,1 @@
+This project uses a knowledge graph based RAG system on an LLM for the task of question-answering.
