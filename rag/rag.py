@@ -1,4 +1,5 @@
 from rag.utils import *
+from rag.spoke import get_context_from_spoke_api
 from config.config import config
 
 class RAG:
@@ -10,10 +11,16 @@ class RAG:
     def retrieve(self, question):
         disease_entities = extract_disease_entities(question, self.openai_client)
         nodes_found = []
+
         if disease_entities:
             for disease in disease_entities:
                 node_search_result = self.vector_store.similarity_search_with_score(disease, k=1)
                 nodes_found.append(node_search_result[0][0].page_content)
+
             question_embedding = get_text_embedding(question, self.embedding_function)
+            
+            for node in nodes_found:
+                get_context_from_spoke_api(node)    
+
         else:
             pass
