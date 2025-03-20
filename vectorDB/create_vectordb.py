@@ -19,6 +19,22 @@ def load_data():
     return data, metadata_list
 
 
+def create_vector_db_no_batching():
+    data, metadata_list = load_data()
+    print(f"Loaded {len(data)} data points")
+    
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
+    docs = text_splitter.create_documents(data, metadatas=metadata_list)
+
+    print("Initializing Chroma VectorDB with HuggingFaceEmbeddings...")
+    vector_store = Chroma(embedding_function=HuggingFaceEmbeddings(model_name=sentence_embedding_model), persist_directory=vector_db_name)
+    
+    for doc in tqdm(docs, desc="Adding documents to VectorDB", unit="doc"):
+        vector_store.add_documents(documents=[doc])
+
+    print("VectorDB created successfully!")
+
+
 def create_vector_db():
     data, metadata_list = load_data()
     print(f"Loaded {len(data)} data points")
