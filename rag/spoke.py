@@ -1,6 +1,7 @@
 import requests
 import ast
 from config.config import config
+import pandas as pd
 
 def get_spoke_api_response(base_url, end_point, params=None):
     uri = base_url + end_point
@@ -87,5 +88,72 @@ def get_context_from_spoke_api(node):
                 evidence = None
             neighbour_edges.append((item["data"]["source"], item["data"]["neo4j_type"], item["data"]["target"], provenance, evidence))
 
-    # print(len(neighbour_nodes))
-    # print(len(neighbour_edges))
+
+    neighbour_nodes_df = pd.DataFrame(neighbour_nodes, columns=["node_type", "node_id", "node_name"])
+    neighbour_edges_df = pd.DataFrame(neighbour_edges, columns=["source", "edge_type", "target", "provenance", "evidence"])
+    context, merged_df = generate_context_and_merged_data(neighbour_nodes_df, neighbour_edges_df, node, node_context)
+    return context, merged_df
+
+
+def generate_context_and_merged_data(nodes_df, edges_df, node_value, node_context):
+    merged_with_source = pd.merge(
+        edges_df, 
+        nodes_df, 
+        left_on="source", 
+        right_on="node_id"
+    ).drop("node_id", axis=1)
+
+    merged_with_source["source_name"] = (
+        merged_with_source["node_type"] + " " + merged_with_source["node_name"]
+    )
+    merged_with_source.drop(["source", "node_type", "node_name"], axis=1, inplace=True)
+    merged_with_source.rename(columns={"source_name": "source"}, inplace=True)
+
+    merged_with_target = pd.merge(
+        merged_with_source, 
+        nodes_df, 
+        left_on="target", 
+        right_on="node_id"
+    ).drop("node_id", axis=1)
+
+    merged_with_target["target_name"] = (
+        merged_with_target["node_type"] + " " + merged_with_target["node_name"]
+    )
+    merged_with_target.drop(["target", "node_type", "node_name"], axis=1, inplace=True)
+    merged_with_target.rename(columns={"target_name": "target"}, inplace=True)
+
+    final_merged_df = merged_with_target[
+        ["source", "edge_type", "target", "provenance", "evidence"]
+    ].copy()
+
+    # final_merged_df["predicate"] = final_merged_df["edge_type"].apply(
+    #     lambda x: x.split("_")[0]
+    # )
+
+    final_merged_df.loc[:, "predicate"] = final_merged_df["edge_type"].apply(
+        lambda x: x.split("_")[0]
+    )
+
+    # final_merged_df["context"] = (
+    #     final_merged_df["source"] + " " +
+    #     final_merged_df["predicate"].str.lower() + " " +
+    #     final_merged_df["target"] + " and Provenance of this association is " +
+    #     final_merged_df["provenance"] + "."
+    # )
+
+    final_merged_df.loc[:, "context"] = (
+        final_merged_df["source"] + " " +
+        final_merged_df["predicate"].str.lower() + " " +
+        final_merged_df["target"] + " and Provenance of this association is " +
+        final_merged_df["provenance"] + "."
+    )
+
+    combined_context = final_merged_df["context"].str.cat(sep=" ")
+
+    combined_context += (
+        f" {node_value} has a {node_context[0]['data']['properties']['source']} "
+        f"identifier of {node_context[0]['data']['properties']['identifier']} "
+        f"and Provenance of this is from {node_context[0]['data']['properties']['source']}."
+    )
+
+    return combined_context, final_merged_df

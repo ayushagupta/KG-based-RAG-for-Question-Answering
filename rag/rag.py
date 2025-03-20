@@ -10,17 +10,22 @@ class RAG:
 
     def retrieve(self, question):
         disease_entities = extract_disease_entities(question, self.openai_client)
+        question_embedding = get_text_embedding(question, self.embedding_function)
         nodes_found = []
 
         if disease_entities:
             for disease in disease_entities:
                 node_search_result = self.vector_store.similarity_search_with_score(disease, k=1)
                 nodes_found.append(node_search_result[0][0].page_content)
-
-            question_embedding = get_text_embedding(question, self.embedding_function)
             
             for node in nodes_found:
-                get_context_from_spoke_api(node)    
+                node_context, context_table = get_context_from_spoke_api(node)
 
+                # file_path = "context.txt"
+                # with open(file_path, "w") as file:
+                #     file.write(node_context)
+                # print(f"Context successfully written to {file_path}")
+
+                
         else:
             pass
