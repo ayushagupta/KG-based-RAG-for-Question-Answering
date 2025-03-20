@@ -126,20 +126,9 @@ def generate_context_and_merged_data(nodes_df, edges_df, node_value, node_contex
         ["source", "edge_type", "target", "provenance", "evidence"]
     ].copy()
 
-    # final_merged_df["predicate"] = final_merged_df["edge_type"].apply(
-    #     lambda x: x.split("_")[0]
-    # )
-
     final_merged_df.loc[:, "predicate"] = final_merged_df["edge_type"].apply(
         lambda x: x.split("_")[0]
     )
-
-    # final_merged_df["context"] = (
-    #     final_merged_df["source"] + " " +
-    #     final_merged_df["predicate"].str.lower() + " " +
-    #     final_merged_df["target"] + " and Provenance of this association is " +
-    #     final_merged_df["provenance"] + "."
-    # )
 
     final_merged_df.loc[:, "context"] = (
         final_merged_df["source"] + " " +
